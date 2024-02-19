@@ -1,0 +1,26 @@
+doctrine:
+    dbal:
+        # Configure the database URL
+        url: '%env(resolve:DATABASE_URL)%'
+
+        # Configure these for your database server
+        driver: 'pdo_pgsql'
+        server_version: '15'
+        dbname: 'hotel_database'
+        user: 'postgres'
+        password: '12345'
+
+    orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true
+        report_fields_where_declared: true
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
