@@ -34,7 +34,7 @@ final class Version20240217063534 extends AbstractMigration
             // Add more users as needed
         ];
 
-        foreach ($users as $userData) {
+        foreach ($users as $userData) { 
             $this->addSql('INSERT INTO login (email, roles, password) VALUES (:email, :roles, :password)', [
                 'email' => $userData['email'],
                 'roles' => $userData['roles'],

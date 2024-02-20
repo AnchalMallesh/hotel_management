@@ -1,4 +1,5 @@
 <?php
+
 // src/DTO/CreateCustomerRequest.php
 
 namespace App\DTO;
@@ -11,30 +12,30 @@ class CreateCustomerRequest
      * @Assert\NotBlank
      * @Assert\Length(max=255)
      */
-    private string $name;
+    private ?string $name = null;
 
     /**
      * @Assert\NotBlank
      * @Assert\Email
      */
-    private string $email;
+    private ?string $email = null;
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setName(string $name): void
+    public function setName(?string $name): void
     {
         $this->name = $name;
     }
 
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
-    public function setEmail(string $email): void
+    public function setEmail(?string $email): void
     {
         $this->email = $email;
     }

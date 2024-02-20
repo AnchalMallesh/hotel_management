@@ -1,14 +1,10 @@
 <?php
-
-// CustomerService.php
-
 namespace App\Service;
 
 use App\Entity\Customer;
 use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -16,22 +12,18 @@ class CustomerService
 {
     private $entityManager;
     private $customerRepository;
+    private $validator;
 
-    public function __construct(EntityManagerInterface $entityManager, CustomerRepository $customerRepository)
+    public function __construct(EntityManagerInterface $entityManager, CustomerRepository $customerRepository, ValidatorInterface $validator)
     {
         $this->entityManager = $entityManager;
         $this->customerRepository = $customerRepository;
+        $this->validator = $validator;
     }
 
-    public function getCustomerById(int $id): JsonResponse
+    public function getCustomerById(int $id): ?Customer
     {
-        $customer = $this->customerRepository->find($id);
-
-        if (!$customer) {
-            return new JsonResponse(['message' => 'Customer not found'], Response::HTTP_NOT_FOUND);
-        }
-
-        return new JsonResponse($customer, Response::HTTP_OK);
+        return $this->customerRepository->find($id);
     }
 
     public function createCustomer(array $data): JsonResponse
@@ -39,6 +31,16 @@ class CustomerService
         $customer = new Customer();
         $customer->setName($data['name']);
         $customer->setEmail($data['email']);
+
+        $errors = $this->validator->validate($customer);
+
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
+        }
 
         $this->entityManager->persist($customer);
         $this->entityManager->flush();
@@ -56,6 +58,16 @@ class CustomerService
 
         $customer->setName($data['name']);
         $customer->setEmail($data['email']);
+
+        $errors = $this->validator->validate($customer);
+
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
+        }
 
         $this->entityManager->flush();
 
@@ -86,4 +98,3 @@ class CustomerService
         return $this->customerRepository->count([]);
     }
 }
-
