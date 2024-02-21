@@ -1,36 +1,37 @@
-api_customers_get:
-    path: /api/customers
-    methods: ['GET']
-    controller: 'App\Controller\CustomerController::index'
-
-api_customers_get_customer:
-    path: /api/customers/{id}
-    methods: ['GET']
-    controller: 'App\Controller\CustomerController::show'
-
-api_customers_create:
-    path: /api/customers
-    methods: ['POST']
-    controller: 'App\Controller\CustomerController::create'
-
-api_customers_update:
-    path: /api/customers/{id}
-    methods: ['PUT']
-    controller: 'App\Controller\CustomerController::update'
-
-api_customers_delete:
-    path: /api/customers/{id}
-    methods: ['DELETE']
-    controller: 'App\Controller\CustomerController::delete'
-
-
-customer_controller:
-    resource: ../src/Controller/CustomerController.php
-    type: annotation
-
 # config/routes.yaml
 
-app_login:
+# Define routes for the CustomerController
+customer_routes:
+    path: /api/v1/customers
+    controller: 'App\Controller\CustomerController::index'
+    methods: ['GET']
+
+customer_show:
+    path: /api/v1/customers/{id}
+    controller: 'App\Controller\CustomerController::show'
+    methods: ['GET']
+    requirements:
+        id: '\d+' # Match numeric IDs only
+
+customer_create:
+    path: /api/v1/customers
+    controller: 'App\Controller\CustomerController::create'
+    methods: ['POST']
+
+customer_update:
+    path: /api/v1/customers/{id}
+    controller: 'App\Controller\CustomerController::update'
+    methods: ['PUT']
+    requirements:
+        id: '\d+' # Match numeric IDs only
+
+customer_delete:
+    path: /api/v1/customers/{id}
+    controller: 'App\Controller\CustomerController::delete'
+    methods: ['DELETE']
+    requirements:
+        id: '\d+' # Match numeric IDs only
+login:
     path: /login
     controller: App\Controller\SecurityController::login
     methods: ['POST']

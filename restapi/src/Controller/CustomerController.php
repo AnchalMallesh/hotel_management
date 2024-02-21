@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-#[Route('/api/customers')]
+#[Route('/api/v1/customers')]
 class CustomerController extends AbstractController
 {
     private $serializer;
@@ -27,9 +27,12 @@ class CustomerController extends AbstractController
     }
 
     #[Route('/', name: 'get_customers', methods: ['GET'])]
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $customers = $this->entityManager->getRepository(Customer::class)->findAll();
+        $page = $request->query->getInt('page', 1);
+        $limit = $request->query->getInt('limit', 4);
+        $offset = ($page - 1) * $limit;
+        $customers = $this->entityManager->getRepository(Customer::class)->findBy([], null, $limit, ($page - 1) * $limit);
 
         $customerData = [];
         foreach ($customers as $customer) {
@@ -40,7 +43,24 @@ class CustomerController extends AbstractController
             ];
         }
 
-        return new JsonResponse($customerData, Response::HTTP_OK);
+        $totalCustomers = count($customerData);
+
+        // $prevPage = ($page > 1) ? $page - 1 : null;
+        // $nextPage = ($page * $limit < $totalCustomers) ? $page + 1 : null;
+
+        // $responseData = [
+        //     'data' => $customerData,
+        //     'pagination' => [
+        //         'total' => $totalCustomers,
+        //         'page' => $page,
+        //         'limit' => $limit,
+        //         'prev_page' => $prevPage,
+        //         'next_page' => $nextPage,
+        //     ],
+        // ];
+
+        return $this->json($customerData);
+        //return new JsonResponse($responseData, Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'get_customer', methods: ['GET'])]
