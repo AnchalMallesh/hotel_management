@@ -1,44 +1,64 @@
 <?php
 namespace App\Tests\Controller;
 
-use App\Controller\SecurityController;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use App\Service\UserService;
-use App\Entity\User;
+use Symfony\Component\Panther\PantherTestCase;
+use Symfony\Component\Panther\Client;
 
-class SecurityControllerTest extends TestCase
+class SecurityControllerTest extends PantherTestCase
 {
-    public function testLogin(): void
+    protected function getConfiguredClient(): Client
     {
-        $userService = $this->createMock(UserService::class);
-        $userService->expects($this->once())
-                    ->method('getUserByEmail')
-                    ->willReturn(new User());
+        $configuredClient = parent::createPantherClient();
+        $configuredClient->setMaxRedirects(5); // Set max number of redirections
+        $configuredClient->setServerParameters([
+            'timeout' => 10.0, // Set custom timeout in seconds
+        ]);
+        return $configuredClient;
+    }
 
-        $userService->expects($this->once())
-                    ->method('validateUserPassword')
-                    ->willReturn(true);
+    public function testLoginWithCorrectCredentials()
+    {
+        $client = static::createPantherClient();
+        $crawler = $client->request('GET', '/login');
 
-        $tokenManager = $this->createMock(JWTTokenManagerInterface::class);
-        $tokenManager->expects($this->once())
-                     ->method('create')
-                     ->willReturn('mock_token');
+        // Wait for the email input to be visible
+        $client->waitFor('#email');
 
-        $request = new Request([], [], [], [], [], [], json_encode([
-            'email' => 'rekhaa@gmail.com',
-            'password' => 'Rekha@123'
-        ]));
+        // Fill in the login form fields
+        $form = $crawler->filter('form')->form();
+        $form['email'] = 'user@example.com';
+        $form['password'] = 'password123';
 
-        $controller = new SecurityController($userService);
+        // Submit the form
+        $client->submit($form);
 
-        $response = $controller->login($request, $tokenManager);
+        // Wait for the page to load after successful login
+        $client->waitFor('#dashboard');
 
-        $this->assertInstanceOf(Response::class, $response);
+        // Check if the user is redirected after successful login
+        $this->assertStringContainsString('/dashboard', $client->getCurrentURL());
+    }
 
-        $this->assertEquals('mock_token', $response->getContent());
+    public function testLoginWithIncorrectCredentials()
+    {
+        $client = static::createPantherClient();
+        $crawler = $client->request('GET', '/login');
+
+        // Wait for the email input to be visible
+        $client->waitFor('#email');
+
+        // Fill in the login form fields with incorrect credentials
+        $form = $crawler->filter('form')->form();
+        $form['email'] = 'user@example.com';
+        $form['password'] = 'wrongpassword';
+
+        // Submit the form
+        $client->submit($form);
+
+        // Wait for the page to load after incorrect login
+        $client->waitFor('.alert-danger');
+
+        // Check if the login form is still displayed due to incorrect credentials
+        $this->assertCount(1, $crawler->filter('.alert-danger'));
     }
 }
-?>

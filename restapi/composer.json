@@ -74,6 +74,7 @@
         "doctrine/doctrine-fixtures-bundle": "^3.5",
         "mockery/mockery": "^1.6",
         "phpunit/phpunit": "^10.5",
+        "symfony/panther": "^2.1",
         "symfony/phpunit-bridge": "^7.0"
     }
 }

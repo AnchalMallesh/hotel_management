@@ -3,15 +3,17 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          backupGlobals="false"
          colors="true"
-         bootstrap="tests/bootstrap.php"
+         bootstrap="vendor/autoload.php"
 >
     <php>
-        <ini name="display_errors" value="1" />
-        <ini name="error_reporting" value="-1" />
+        <!-- Your existing php configuration -->
+
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
         <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
+
+        <env name="KERNEL_CLASS" value="\App\Kernel"/> <!-- Add this line -->
     </php>
 
     <testsuites>
@@ -20,9 +22,26 @@
         </testsuite>
     </testsuites>
 
-    <!-- Remove the coverage element -->
-    
-    <!-- Remove the listeners element -->
+    <!-- Uncomment the coverage element if you want to enable code coverage -->
+    <!--
+    <filter>
+        <whitelist>
+            <directory>src/</directory>
+        </whitelist>
+    </filter>
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">src/</directory>
+        </include>
+    </coverage>
+    -->
+
+    <!-- Uncomment the listeners element if you need to add custom listeners -->
+    <!--
+    <listeners>
+        <listener class="Your\Custom\Listener\Class" />
+    </listeners>
+    -->
 
     <!-- You can optionally add extensions here if needed -->
 </phpunit>

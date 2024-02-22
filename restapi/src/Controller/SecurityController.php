@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use App\Service\UserService;
 use App\Entity\User;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class SecurityController extends AbstractController
 {
@@ -22,24 +23,27 @@ class SecurityController extends AbstractController
         $userCreds = json_decode($request->getContent());
 
         if (($userCreds->email ?? null) === null || ($userCreds->password ?? null) === null) {
-            throw new  \Exception('Missing user credentials');
+            throw new \Exception('Missing user credentials');
         }
 
         $user = $this->userService->getUserByEmail($userCreds->email);
 
         if (!$user instanceof User) {
-            return new Response(
-                sprintf('No user exists for email %s', $userCreds->email),
+            return new JsonResponse(
+                ['error' => sprintf('No user exists for email %s', $userCreds->email)],
                 Response::HTTP_UNAUTHORIZED
             );
         }
 
         if (!$this->userService->validateUserPassword($user, $userCreds->password)) {
-            return new Response('Authentication failed because password is not correct', Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(
+                ['error' => 'Authentication failed because password is not correct'],
+                Response::HTTP_UNAUTHORIZED
+            );
         }
 
         $token = $tokenManager->create($user);
 
-        return new Response($token);
+        return new JsonResponse(['token' => $token]);
     }
 }
